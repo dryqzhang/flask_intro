@@ -1,0 +1,10 @@
+{
+    "conference": "seventh neurology meeting",
+    "date": "2020Sep19",
+    "invitedSpeaker": "CZYan",
+    "speaker":{
+        "fristName": "Yongqing",
+        "lastName": "Zhang",
+        "topics": ["hospital information", "REST", "Fourier"]
+    }
+}
