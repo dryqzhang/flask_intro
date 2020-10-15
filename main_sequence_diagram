@@ -1,0 +1,75 @@
+%%interpret by mermaid, ctrl+option+o
+
+%%现有系统基础上的调整
+sequenceDiagram
+  participant 门诊排班系统
+  participant 门诊挂号系统
+  participant 门诊EMR
+  participant 门诊order
+
+  participant 住院EMR
+  participant 住院order
+
+  participant LIS/PACS等
+  Note right of LIS/PACS等: 尽量包含已有化验和检查
+
+ %%定义loop
+  loop 排班更新
+    门诊排班系统->>门诊排班系统: 排班实时更新
+  end
+
+ rect rgb(255, 255, 0)
+  loop 门诊EMR复用
+    门诊EMR->>门诊EMR: ditto
+    Note over 门诊EMR,门诊EMR: 实现意义大
+  end
+ end
+
+  loop 门诊order复用
+    门诊order->>门诊order: ditto
+    Note over 门诊order,门诊order: 已实现
+  end
+
+  loop 住院order复用
+    住院order->>住院order: ditto
+  end
+
+  rect rgb(255, 255, 0)
+   loop 外院检查检验导入
+     LIS/PACS等->>LIS/PACS等: 扫描为主的外院信息导入
+     Note over LIS/PACS等,LIS/PACS等: 实现意义大
+   end
+  end
+
+%%定义关联
+  门诊排班系统 ->> 门诊挂号系统: 提供排班信息
+ rect rgb(240, 240, 240)
+  门诊order -->> 门诊EMR: ditto
+  Note over 门诊order,门诊order: 已实现
+ end
+
+ rect rgb(200, 200, 200)
+  门诊order -->> 住院order: 院前检查-可选且实现难度大
+ end
+
+ rect rgb(250, 200, 200)
+  住院order ->> 门诊挂号系统: 出院患者预约复诊
+
+  loop inpatient-outpatient
+    住院order --> 门诊挂号系统: 门诊和住院衔接过程
+  end
+ end
+
+ rect rgb(255, 255, 0)
+  住院order -->> 门诊order: ditto
+  Note over 住院order,门诊order: 实现意义大
+ end
+
+ rect rgb(255, 100, 100)
+ par [LIS/PACS etc to EMR]
+  LIS/PACS等 -->> 门诊EMR: ditto
+ and
+  LIS/PACS等 -->> 住院EMR: ditto
+  Note over LIS/PACS等,门诊EMR: 欠账--早就应该实现了
+ end
+ end

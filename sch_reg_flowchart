@@ -1,0 +1,57 @@
+%%interpret by mermaid with ctrl+option+o
+
+flowchart TB
+%%门诊系统的组成：门诊排班schedule，挂号预约registration，叫号看诊，以EMR为基础的诊前诊中诊后系统
+%%门诊排班资源池
+  subgraph sg_res_pool
+    %% 以最多可提前三个月预约为准
+    Dep_Sch_Adm[科室排班管理员] --- Sp[专家门诊] --->|暂定提前两个月| Sch_Pool[(初始门诊排班资源池--电子门诊排班系统)];
+    Dep_Sch_Adm --- Ge[普通门诊] --->|暂定提前三个月| Sch_Pool;
+    Dep_Sch_Adm --- Sp_Dis[专病门诊] --->|暂定提前六个月| Sch_Pool;
+    OPD[门诊部] --- MDT[MDT--多学科诊疗] --->|暂定提前六个月| Sch_Pool;
+    Sch_Pool --->|无变更| Real_Sch_Pool[(实时门诊排班资源池)]
+    Sch_Pool ===> Pool((各公示渠道))
+    Real_Sch_Pool <===>|实时| Pool
+  end
+
+%%门诊排班资源池变更
+  subgraph sg_res_update
+    Cha_Sch{{决定更改出诊信息}} -->Cli_Main[申请人--申请方式为代诊或停诊] --> Dep_Supervision[主任--审核]--> Med_Adm_Department[医务部--审核]-->Cha_Schedule[/医院专人--修改排班信息\]
+  end
+
+%%建档挂号流程
+  subgraph sg_reg_procedure
+    %%医护均可在患者授权情况下为其预约，以及取消和变更
+    Pts_Cha{{患者改约}} ---> |医疗及护理|Registration[挂号--除设定为现场挂号的资源]
+    Pts_Dis{{患者出院}} ---> |住院医师|Registration
+    OPD_Ref{{门诊转诊}} ---> |看诊医师|Registration
+    Reg_Other{{其他情况......}} ---> Registration
+    Registration ---> Fee{{是否需取号缴费--建议看诊后缴费--延伸是否取消所有预约挂号提前缴费--知名专家号需提前付费}}
+    Pts_Self_Relation[患者本人或家属等] -->|传统意义上的挂号| Fil_Exist{系统中患者信息是否存在} -->|否| Filing[建档] ---> Registration
+    Other_Staff[医联体等机构工作人员] --> Fil_Exist
+    Fil_Exist --->|是| Registration
+    Registration --> Reg_Pool[(挂号数据库)]
+  end
+
+ %%挂号变更
+  subgraph sg_reg_update
+    Nr_Section[相应诊区护理人员--鼓励看诊医师主动与患者联系]-->|电话等方式通知| Pt_Appoint{患者是否决定更改看诊医师}
+    Pt_Appoint -->|是| Hold[/不改期--由代诊医师看诊\]
+    Pt_Appoint -->|否| Cha_Date[/改期--由原医师看诊\]
+  end
+
+%%看诊执行时间
+  subgraph sg_clinic
+    %% 确认是否取消看诊
+    Nr_OnDuty[当日跟诊护士] -->|预约时间延迟一小时后以电话等方式通知| Pt_Current{未看诊患者是否取消本次预约}
+    Pt_Current-->|是| A1[/取消\]
+    Pt_Current -->|否| Cha_Date_Out[/改期\]
+  end
+
+%%subgraph间互连部分
+  Sch_Pool ==>|排班变更--读取| sg_res_update
+  Cha_Schedule -->|排班变更--写入| Real_Sch_Pool
+  Real_Sch_Pool -->|读取排班信息| sg_reg_procedure
+  Cha_Date --> Pts_Cha
+  Cha_Date_Out --> Pts_Cha
+  Cha_Schedule --> Nr_Section
