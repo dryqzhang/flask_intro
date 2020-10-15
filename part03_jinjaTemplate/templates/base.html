@@ -1,0 +1,16 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    {% block head %}
+    <title>{% block title %}{% endblock %} - My Webpage</title>
+    {% endblock %}
+</head>
+
+<body>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+        &copy; Copyright 2008 by > 山东大学齐鲁医院（青岛） </a>.
+        {% endblock %}
+    </div>
+</body>
